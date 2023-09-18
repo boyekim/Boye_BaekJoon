@@ -1,91 +1,51 @@
 #include <iostream>
-#include <queue>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
-int n, m, sum;
-priority_queue<int> pq_neg;
-priority_queue<int> pq_pos;
+int n, m, size_pos, size_neg, idx_pos, idx_neg;
+int dis_neg, dis_pos, ans;
+vector<int> pos;
+vector<int> neg;
 
 void solve() {
-    int cnt = 0;
-    int distance = 0;
-
-    while (!pq_neg.empty()) {
-        int tmp = pq_neg.top();
-        pq_neg.pop();
-        cnt++;
-        if (cnt == 1) {
-            distance = tmp;
-        } else if (cnt == m) {
-            cnt = 0;
-            sum += distance * 2;
-            distance = 0; //마지막에 distance*2를 더해줄 때 하나만 남았던 거 아니면 더 더해지지 않도록
-        }
+    int i, M = 0;
+    for (i = idx_pos; i >= 0; i -= m) {
+        dis_pos += pos[i] * 2;
     }
-    sum += distance * 2;
-
-    cnt = 0;
-    distance = 0;
-    while (!pq_pos.empty()) {
-        int tmp = pq_pos.top();
-        pq_pos.pop();
-        cnt++;
-        if (cnt == 1) {
-            distance = tmp;
-        } else if (cnt == m) {
-            cnt = 0;
-            sum += distance * 2;
-            distance = 0; //마지막에 distance*2를 더해줄 때 하나만 남았던 거 아니면 더 더해지지 않도록
-        }
+    for (i = idx_neg; i >= 0; i -= m) {
+        dis_neg += neg[i] * 2;
     }
-    sum += distance * 2;
+    if (size_pos != 0 && size_neg != 0)
+        M = max(pos[idx_pos], neg[idx_neg]);
+    else if (size_pos == 0) {
+        M = neg[idx_neg];
+    } else if (size_neg == 0) {
+        M = pos[idx_pos];
+    }
+    ans = dis_pos + dis_neg - M;
 }
 
 int main() {
-    int i, dis;
+    int i;
     cin >> n >> m;
-
     for (i = 0; i < n; i++) {
+        int dis;
         cin >> dis;
         if (dis < 0) {
-            pq_neg.push((-1) * dis);
+            neg.push_back((-1) * dis);
         } else {
-            pq_pos.push(dis);
+            pos.push_back(dis);
         }
     }
-
-    if (pq_neg.size() > 0 && pq_pos.size() > 0
-        && pq_neg.top() > pq_pos.top()) {
-        sum += pq_neg.top();
-        for (i = 0; i < m; i++) {
-            if (!pq_neg.empty())
-                pq_neg.pop();
-        }
-        solve();
-    } else if (pq_neg.size() > 0 && pq_pos.size() > 0
-               && pq_neg.top() <= pq_pos.top()) {
-        sum += pq_pos.top();
-        for (i = 0; i < m; i++) {
-            if (!pq_pos.empty())
-                pq_pos.pop();
-        }
-        solve();
-    } else if (pq_neg.size() == 0) {
-        sum += pq_pos.top();
-        for (i = 0; i < m; i++) {
-            if (!pq_pos.empty())
-                pq_pos.pop();
-        }
-        solve();
-    } else if (pq_pos.size() == 0) {
-        sum += pq_neg.top();
-        for (i = 0; i < m; i++) {
-            if (!pq_neg.empty())
-                pq_neg.pop();
-        }
-        solve();
-    }
-    cout << sum;
+    size_pos = pos.size();
+    size_neg = neg.size();
+    idx_pos = size_pos - 1;
+    idx_neg = size_neg - 1;
+    sort(neg.begin(), neg.end());
+    sort(pos.begin(), pos.end());
+    solve();
+    cout << ans;
     return 0;
 }
