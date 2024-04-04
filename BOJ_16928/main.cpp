@@ -27,7 +27,6 @@ void solve() {
     int i, now, next;
     queue<int> q;
     q.push(1);
-    visited[1] = true;
     cnt[1] = 0;
     while (!q.empty()) {
         now = q.front();
